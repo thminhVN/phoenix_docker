@@ -1,16 +1,20 @@
 FROM elixir:latest
+MAINTAINER Minh Tran <thminhkg@gmail.com>
 
-# Install hex
-RUN mix local.hex --force
+RUN mix local.hex --force \
+ && mix archive.install --force https://github.com/phoenixframework/archives/raw/master/phx_new.ez \
+ && apt-get update \
+ && curl -sL https://deb.nodesource.com/setup_6.x | bash \
+ && apt-get install -y apt-utils \
+ && apt-get install -y nodejs \
+ && apt-get install -y build-essential \
+ && apt-get install -y inotify-tools \
+ && mix local.rebar --force
 
-# Install rebar
-RUN mix local.rebar --force
+ENV APP_HOME /code
+RUN mkdir -p $APP_HOME
+WORKDIR $APP_HOME
 
-# Install the Phoenix framework itself
-RUN mix archive.install https://github.com/phoenixframework/archives/raw/master/phx_new.ez --force
+EXPOSE 4000
 
-# Install NodeJS 6.x and the NPM
-RUN curl -sL https://deb.nodesource.com/setup_6.x | bash -
-RUN apt-get install -y -q nodejs
-
-RUN mkdir /code
+CMD ["mix", "phx.server"]
